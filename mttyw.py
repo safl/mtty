@@ -88,7 +88,6 @@ def mtty_connect():
     global thread
     print(inspect.currentframe().f_code.co_name)
     
-
     if thread is None:
         thread = socketio.start_background_task(target=background_thread)
     payload = {
@@ -171,11 +170,11 @@ def disconnect_request():
     
     disconnect()
 
-@socketio.on('my_ping', namespace='/mtty')
+@socketio.on('ping', namespace='/mtty')
 def ping_pong():
     print(inspect.currentframe().f_code.co_name)
     
-    emit('my_pong')
+    emit('pong')
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
