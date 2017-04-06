@@ -12,7 +12,7 @@
 ### END INIT INFO
 
 # If you want a command to always run, put it here
-DEV_PATHS="/dev/ttyUSB0"
+DEV_PATHS="/dev/ttyUSB0 /dev/ttyUSB1 /dev/ttyUSB2/dev/ttyUSB3"
 LOG_ROOT="/var/www/html"
 
 # Carry out specific functions when asked to by the system

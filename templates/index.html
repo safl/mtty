@@ -67,19 +67,19 @@
                 socket.emit('my_broadcast_event', {data: $('#broadcast_data').val()});
                 return false;
             });
-            $('form#join').submit(function(event) {
-                socket.emit('join', {room: $('#join_room').val()});
+            $('form#join_room').submit(function(event) {
+                socket.emit('join_room', {room: $('#join_room').val()});
                 return false;
             });
-            $('form#leave').submit(function(event) {
-                socket.emit('leave', {room: $('#leave_room').val()});
+            $('form#leave_room').submit(function(event) {
+                socket.emit('leave_room', {room: $('#leave_room').val()});
                 return false;
             });
             $('form#send_room').submit(function(event) {
                 socket.emit('my_room_event', {room: $('#room_name').val(), data: $('#room_data').val()});
                 return false;
             });
-            $('form#close').submit(function(event) {
+            $('form#close_room').submit(function(event) {
                 socket.emit('close_room', {room: $('#close_room').val()});
                 return false;
             });
@@ -103,11 +103,11 @@
         <input type="text" name="broadcast_data" id="broadcast_data" placeholder="Message">
         <input type="submit" value="Broadcast">
     </form>
-    <form id="join" method="POST" action='#'>
+    <form id="join_room" method="POST" action='#'>
         <input type="text" name="join_room" id="join_room" placeholder="Room Name">
         <input type="submit" value="Join Room">
     </form>
-    <form id="leave" method="POST" action='#'>
+    <form id="leave_room" method="POST" action='#'>
         <input type="text" name="leave_room" id="leave_room" placeholder="Room Name">
         <input type="submit" value="Leave Room">
     </form>
@@ -116,7 +116,7 @@
         <input type="text" name="room_data" id="room_data" placeholder="Message">
         <input type="submit" value="Send to Room">
     </form>
-    <form id="close" method="POST" action="#">
+    <form id="close_room" method="POST" action="#">
         <input type="text" name="close_room" id="close_room" placeholder="Room Name">
         <input type="submit" value="Close Room">
     </form>

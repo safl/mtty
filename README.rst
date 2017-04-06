@@ -46,6 +46,10 @@ Or tail it over ssh::
 
   ssh root@host "tail -f /var/www/html/ttyUSB0.log"
 
+Provide into via screen::
+
+  screen /dev/ttyUSB0 115200,cs8,inclr
+
 Raspberry PI setup
 ==================
 
