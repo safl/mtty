@@ -3,7 +3,10 @@ import inspect
 from flask import Flask, render_template, session, request
 from flask import send_from_directory
 import flask_socketio as fsio
+import select
 import glob
+import time
+import sys
 import os
 
 # Set this variable to "threading", "eventlet" or "gevent" to test the
@@ -16,16 +19,40 @@ APP.config['SECRET_KEY'] = 'secret!'
 SIO = fsio.SocketIO(APP, async_mode=ASYNC_MODE)
 THREAD = None
 
+MONITORS = {}
+
+def tailf(fpath):
+    """Generate stream of bytes from files"""
+
+    POLL_EXISTS = 0.5
+    POLL_CONTENT = 0.1
+
+    while True:
+        try:
+            with open(fpath, 'r') as fin:
+                read = 0
+                while read <= os.stat(fpath).st_size:
+                    char = fin.read()
+
+                    if char:
+                        read += 1
+                        yield char
+
+                    time.sleep(POLL_CONTENT)
+        except OSError:
+            time.sleep(POLL_EXISTS)
+        except IOError:
+            time.sleep(POLL_EXISTS)
+
 def background_thread():
     """Example of how to send server generated events to clients."""
 
-    count = 0
-    while True:
-        SIO.sleep(10)
+    for char in tailf("/tmp/something"):
+        count = 0
         count += 1
 
         payload = {
-            'data': 'Server generated event',
+            'data': char,
             'count': count
         }
         SIO.emit('my_response', payload, namespace='/mtty')
@@ -47,23 +74,23 @@ def logs(path):
     html_entry = '<a href="%s">%s</a><br />\n'
 
     if path is None:
-	files = glob.glob(os.sep.join([logs_root, "*"]))
-	pfiles = (os.path.basename(fname) for fname in files)
-	markup = (html_entry % (fname, fname) for fname in pfiles)
-	
-	return "".join(list(markup))
+        files = glob.glob(os.sep.join([logs_root, "*"]))
+        pfiles = (os.path.basename(fname) for fname in files)
+        markup = (html_entry % (fname, fname) for fname in pfiles)
+
+    return "".join(list(markup))
 
     if os.path.exists(path):
-	return "DOES NOT EXIST"
+        return "DOES NOT EXIST"
 
     return send_from_directory(logs_root, os.path.basename(path))
 
 @SIO.on('my_event', namespace='/mtty')
 def mtty_message(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-    
+
     payload = {
         'data': message['data'],
         'count': session['receive_count']
@@ -73,9 +100,9 @@ def mtty_message(message):
 @SIO.on('my_broadcast_event', namespace='/mtty')
 def mtty_broadcast_message(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-   
+
     payload = {
         'data': message['data'],
         'count': session['receive_count']
@@ -86,7 +113,7 @@ def mtty_broadcast_message(message):
 def mtty_connect():
     global THREAD
     print(inspect.currentframe().f_code.co_name)
-    
+
     if THREAD is None:
         THREAD = SIO.start_background_task(target=background_thread)
     payload = {
@@ -98,17 +125,17 @@ def mtty_connect():
 @SIO.on('disconnect', namespace='/mtty')
 def mtty_disconnect():
     print(inspect.currentframe().f_code.co_name)
-    
+
     print('Client disconnected', request.sid)
 
 @SIO.on('join_room', namespace='/mtty')
 def join_room(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     fsio.join_room(message['room'])
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-   
+
     payload = {
         'data': 'In rooms: ' + ', '.join(fsio.rooms()),
         'count': session['receive_count']
@@ -118,11 +145,11 @@ def join_room(message):
 @SIO.on('leave_room', namespace='/mtty')
 def leave_room(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     fsio.leave_room(message['room'])
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-   
+
     payload = {
         'data': 'In rooms: ' + ', '.join(fsio.rooms()),
         'count': session['receive_count']
@@ -132,23 +159,23 @@ def leave_room(message):
 @SIO.on('close_room', namespace='/mtty')
 def close_room(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-    
+
     payload = {
         'data': 'Room ' + message['room'] + ' is closing.',
         'count': session['receive_count']
     }
     fsio.emit('my_response', payload, room=message['room'])
-    
+
     fsio.close_room(message['room'])
 
 @SIO.on('my_room_event', namespace='/mtty')
 def send_room_message(message):
     print(inspect.currentframe().f_code.co_name)
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
-    
+
     payload = {
         'data': message['data'],
         'count': session['receive_count']
@@ -158,7 +185,7 @@ def send_room_message(message):
 @SIO.on('disconnect_request', namespace='/mtty')
 def disconnect_request():
     print(inspect.currentframe().f_code.co_name)
-    
+
     session['receive_count'] = session.get('receive_count', 0) + 1
 
     payload = {
@@ -166,13 +193,13 @@ def disconnect_request():
         'count': session['receive_count']
     }
     fsio.emit('my_response', payload)
-    
+
     fsio.disconnect()
 
 @SIO.on('ping', namespace='/mtty')
 def ping_pong():
     print(inspect.currentframe().f_code.co_name)
-    
+
     fsio.emit('pong')
 
 if __name__ == '__main__':
