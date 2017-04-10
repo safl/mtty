@@ -27,7 +27,10 @@ case "$1" in
     ;;
   stop)
     echo "Stopping mtty"
-      killall mtty.sh
+    for DEV_PATH in $DEV_PATHS; do
+      pkill -f "cat $DEVPATH"
+    done
+    killall mtty.sh
     ;;
   *)
     echo "Usage: /etc/init.d/mtty {start|stop}"
