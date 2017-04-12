@@ -55,7 +55,7 @@ def background_thread():
             'data': char,
             'count': count
         }
-        SIO.emit('my_response', payload, namespace='/mtty')
+        SIO.emit('logs', payload, namespace='/mtty')
 
 @APP.route('/')
 def index():
