@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+<title>{% block title %}{% endblock %}</title>
+{% block head %}
+{% endblock %}
+<style type="text/css">
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #002b36;
+    font-family: monaco, monospace;
+    color: #839496;
+}
+
+.header, .footer {
+    padding: 10px;
+    background: #073642;
+}
+
+.footer {
+    padding: 0px;
+}
+
+input[type=text] {
+    width: 100%;
+    background-color: #073642;
+    font-family: inherit;
+    font-size: 100%;
+    color: #839496;
+    margin: 0;
+    border: 0;
+    padding: 10px;
+    -webkit-box-sizing: border-box; // Safari/Chrome, other WebKit
+    -moz-box-sizing: border-box;    // Firefox, other Gecko
+    box-sizing: border-box;         // Opera/IE 8+
+}
+
+.container {
+    display: table;
+    width: 100%;
+    height: 100%;
+}
+
+.content {
+    display: table-row;
+    height: 100%;
+}
+
+.content-body {
+    display: table-cell;
+}
+
+.scroller {
+    max-height: 100%;
+    overflow-y: auto;
+}
+
+p {
+    margin-top: 0;
+    margin-bottom: 1rem;
+}
+
+p:last-child {
+    margin-bottom: 0;
+}
+</style>
+</head>
+<body>
+{% block body %}
+{% endblock %}
+</body>
+</html>

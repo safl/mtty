@@ -12,13 +12,16 @@ import os
 # Set this variable to "threading", "eventlet" or "gevent" to test the
 # different async modes, or leave it set to None for the application to choose
 # the best option based on installed packages.
-ASYNC_MODE = None
+#ASYNC_MODE = None
+#ASYNC_MODE = "eventlet"
+ASYNC_MODE = "gevent"
 
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'secret!'
 SIO = fsio.SocketIO(APP, async_mode=ASYNC_MODE)
 
 TTYS = ["ttyUSB0", "ttyUSB1", "ttyUSB2", "ttyUSB3"]
+#TTYS = []
 WORKERS = []
 
 def tailf(fpath):
@@ -47,7 +50,7 @@ def tailf(fpath):
 def background_thread(tty):
     """Example of how to send server generated events to clients."""
 
-    for chunk in tailf("/tmp/something"):
+    for chunk in tailf("/tmp/%s.log" % tty):
         payload = {
             'data': chunk
         }
@@ -60,7 +63,7 @@ def index(dev):
     tty = "tty" + dev
 
     return render_template(
-        'index.html',
+        'wtty.html',
         async_mode=SIO.async_mode,
         tty=tty
     )
@@ -72,16 +75,22 @@ def logs(path):
 
     logs_root = os.sep.join(["", "tmp"])
 
-    html_entry = '<a href="%s">%s</a><br />\n'
-
     if path is None:
-        files = glob.glob(os.sep.join([logs_root, "*"]))
-        pfiles = (os.path.basename(fname) for fname in files)
-        markup = (html_entry % (fname, fname) for fname in pfiles)
+        listing = {}
+        
+        for tty in TTYS:
+            pattern = os.sep.join([logs_root, "%s*.log" % tty])
+            paths = glob.glob(pattern)
+            listing[tty] = [os.path.basename(fname) for fname in paths]
+            listing[tty].sort()
 
-        return "".join(list(markup))
+        return render_template(
+            'index.html',
+            ttys=TTYS,
+            listing=listing
+        )
 
-    if os.path.exists(path):
+    if not os.path.exists(path):
         return "DOES NOT EXIST"
 
     return send_from_directory(logs_root, os.path.basename(path))

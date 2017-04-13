@@ -3,7 +3,12 @@ import random
 import time
 
 SOURCE_PATH="pseudo_source"
-TARGET_PATH="/tmp/something"
+TARGET_PATHS=[
+    "/tmp/ttyUSB0.log",
+    "/tmp/ttyUSB1.log",
+    "/tmp/ttyUSB2.log",
+    "/tmp/ttyUSB3.log"
+]
 
 def main():
 
@@ -12,19 +17,21 @@ def main():
         if not line.strip():
             continue
 
-        #n = 80
-        #for sline in (line[i:i+n] for i in xrange(0, len(line), n)):
-        #    lines.append(sline)
-        lines.append(line)
+        n = 80
+        for sline in (line[i:i+n] for i in xrange(0, len(line), n)):
+            lines.append(sline)
+        #lines.append(line)
 
     while True:
 
-        with open(TARGET_PATH, "w+") as tfd:
-            tfd.truncate()
+        for tpath in TARGET_PATHS:
+            with open(tpath, "w+") as tfd:
+                tfd.truncate()
 
         for i in xrange(0, 1000):
-            with open(TARGET_PATH, "a+") as tfd:
-                tfd.write(lines[random.randint(0, len(lines) - 1)])
+            for tpath in TARGET_PATHS:
+                with open(tpath, "a+") as tfd:
+                    tfd.write(lines[random.randint(0, len(lines) - 1)])
 
             time.sleep(0.1)
 
