@@ -6,65 +6,64 @@
 <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/socket.io/1.3.5/socket.io.min.js"></script>
 <style type="text/css">
 html, body {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-	background-color: #002b36;
-	font-family: monaco, monospace;
-	color: #839496;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #002b36;
+    font-family: monaco, monospace;
+    color: #839496;
 }
 
 .header, .footer {
-	padding: 10px;
-	background: #073642;
+    padding: 10px;
+    background: #073642;
 }
 
 .footer {
-	padding: 0px;
+    padding: 0px;
 }
 
 input[type=text] {
-	width: 100%;
-	background-color: #073642;
-	font-family: inherit;
-	font-size: 100%;
-	color: #839496;
-	margin: 0;
-	border: 0;
-	padding: 10px;
-	-webkit-box-sizing: border-box; // Safari/Chrome, other WebKit
-	-moz-box-sizing: border-box;    // Firefox, other Gecko
-	box-sizing: border-box;         // Opera/IE 8+
+    width: 100%;
+    background-color: #073642;
+    font-family: inherit;
+    font-size: 100%;
+    color: #839496;
+    margin: 0;
+    border: 0;
+    padding: 10px;
+    -webkit-box-sizing: border-box; // Safari/Chrome, other WebKit
+    -moz-box-sizing: border-box;    // Firefox, other Gecko
+    box-sizing: border-box;         // Opera/IE 8+
 }
 
 .container {
-	display: table;
-	width: 100%;
-	height: 100%;
+    display: table;
+    width: 100%;
+    height: 100%;
 }
 
 .content {
-	display: table-row;
-	height: 100%;
+    display: table-row;
+    height: 100%;
 }
 
 .content-body {
-	display: table-cell;
+    display: table-cell;
 }
 
 .scroller {
-	max-height: 100%;
-	overflow-y: auto;
-	overflow-x: auto;
+    max-height: 100%;
+    overflow-y: auto;
 }
 
 p {
-	margin-top: 0;
-	margin-bottom: 1rem;
+    margin-top: 0;
+    margin-bottom: 1rem;
 }
 
 p:last-child {
-	margin-bottom: 0;
+    margin-bottom: 0;
 }
 
 </style>
@@ -72,90 +71,91 @@ p:last-child {
 <body>
 
 <div class="container">
-	<header class="header">
-		<p>wtty: {tty: {{ tty }}, async_mode: {{ async_mode }}, latency: <span id="ping-pong"></span>ms</b>}</p>
-	</header>
+    <header class="header">
+        <p>wtty: {tty: {{ tty }}, async_mode: {{ async_mode }}, latency: <span id="ping-pong"></span>ms</b>}</p>
+    </header>
 
-	<section class="content">
-		<div class="content-body">
-		<div id="log" class="scroller"></div>
-		</div>
-	</section>
+    <section class="content">
+        <div class="content-body">
+        <div id="log" class="scroller"></div>
+        </div>
+    </section>
 
-	<footer class="footer">
-		<form id="emit" method="POST" action='#'>
-		<input type="text" name="emit_data" id="emit_data" placeholder="Type here, then hit <ENTER>">
-		</form>
-	</footer>
+    <footer class="footer">
+        <form id="emit" method="POST" action='#'>
+        <input type="text" name="emit_data" id="emit_data" placeholder="Type here, then hit <ENTER>">
+        </form>
+    </footer>
 </div>
 
 <script type="text/javascript" charset="utf-8">
-	$(document).ready(function() {
+    $(document).ready(function() {
 
-		var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
-		var ping_pong_times = [];
-		var start_time;
+        var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
+        var ping_pong_times = [];
+        var start_time;
 
-		// Event handler for new connections.
-		// The callback function is invoked when a connection with the
-		// server is established.
-		socket.on('connect', function() {
-			console.log("socket.on:connect");
+        // Event handler for new connections.
+        // The callback function is invoked when a connection with the
+        // server is established.
+        socket.on('connect', function() {
+            console.log("socket.on:connect");
 
-			socket.emit('wtty_dev', {data: "{{ tty }}" });
+            socket.emit('wtty_dev', {data: "{{ tty }}" });
 
-			// Focus input section
-			$('#emit_data').focus();
-			$(window).focus(function() {
-				$('#emit_data').focus();
-			});
-		});
+            // Focus input section
+            $('#emit_data').focus();
+            $(window).focus(function() {
+                $('#emit_data').focus();
+            });
+        });
 
-		// Messages send from server that aren't tty output
-		socket.on('wtty_info', function(msg) {
-			console.log("socket.on:wtty_info");
+        // Messages send from server that aren't tty output
+        socket.on('wtty_info', function(msg) {
+            console.log("socket.on:wtty_info");
 
-			console.log(msg);
-		});
+            console.log(msg);
+        });
 
-		socket.on('wtty_out', function(msg) {
-			console.log("socket.on:wtty_out");
+        socket.on('wtty_out', function(msg) {
+            console.log("socket.on:wtty_out");
 
-			var payload = msg.data;
+            var payload = msg.data;
 
-			$('#log').append('<br>' + $('<div/>').text(payload).html());
-			if ((!document.hasFocus()) || $('#emit_data').is(":focus")) {
-				$('#log').scrollTop($('#log').prop('scrollHeight'));
-			}
-		});
+            $('#log').append(payload + "<br/>");
 
-		socket.on('pong', function() {		// Handle response to ping
-			console.log("socket.on:pong");
+            if ((!document.hasFocus()) || $('#emit_data').is(":focus")) {
+                $('#log').scrollTop($('#log').prop('scrollHeight'));
+            }
+        });
 
-			var latency = (new Date).getTime() - start_time;
-			ping_pong_times.push(latency);
-			ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
-			var sum = 0;
-			for (var i = 0; i < ping_pong_times.length; i++)
-				sum += ping_pong_times[i];
-			$('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
-		});
+        socket.on('pong', function() {      // Handle response to ping
+            console.log("socket.on:pong");
 
-		window.setInterval(function() {		// Send ping every second
-			start_time = (new Date).getTime();
-			socket.emit('ping');
-		}, 1000);
+            var latency = (new Date).getTime() - start_time;
+            ping_pong_times.push(latency);
+            ping_pong_times = ping_pong_times.slice(-30); // keep last 30 samples
+            var sum = 0;
+            for (var i = 0; i < ping_pong_times.length; i++)
+                sum += ping_pong_times[i];
+            $('#ping-pong').text(Math.round(10 * sum / ping_pong_times.length) / 10);
+        });
+
+        window.setInterval(function() {     // Send ping every second
+            start_time = (new Date).getTime();
+            socket.emit('ping');
+        }, 1000);
 
 
-		// Handlers for the different forms in the page.
-		// These accept data from the user and send it to the server in a
-		// variety of ways
-		$('form#emit').submit(function(event) {
-			socket.emit('wtty_in', {data: $('#emit_data').val()});
-			event.currentTarget.reset();
-			return false;
-		});
-	});
+        // Handlers for the different forms in the page.
+        // These accept data from the user and send it to the server in a
+        // variety of ways
+        $('form#emit').submit(function(event) {
+            socket.emit('wtty_in', {data: $('#emit_data').val()});
+            event.currentTarget.reset();
+            return false;
+        });
+    });
 </script>
 </body>
 </html>

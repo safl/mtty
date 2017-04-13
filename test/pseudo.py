@@ -12,9 +12,10 @@ def main():
         if not line.strip():
             continue
 
-        n = 80
-        for sline in (line[i:i+n] for i in xrange(0, len(line), n)):
-            lines.append(sline)
+        #n = 80
+        #for sline in (line[i:i+n] for i in xrange(0, len(line), n)):
+        #    lines.append(sline)
+        lines.append(line)
 
     while True:
 
