@@ -1,0 +1,5 @@
+devices:
+  - {alias: "ttyUSB0", dev_path: "/dev/ttyUSB0", output_path: "/var/www/html/ttyUSB0.log"}
+  - {alias: "ttyUSB1", dev_path: "/dev/ttyUSB1", output_path: "/var/www/html/ttyUSB1.log"}
+  - {alias: "ttyUSB2", dev_path: "/dev/ttyUSB2", output_path: "/var/www/html/ttyUSB2.log"}
+  - {alias: "ttyUSB3", dev_path: "/dev/ttyUSB3", output_path: "/var/www/html/ttyUSB3.log"}
