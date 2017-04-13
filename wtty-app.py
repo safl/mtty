@@ -81,17 +81,25 @@ def logs(path):
         for tty in TTYS:
             pattern = os.sep.join([logs_root, "%s*.log" % tty])
             paths = glob.glob(pattern)
-            listing[tty] = [os.path.basename(fname) for fname in paths]
+            stats = [os.stat(path) for path in paths]
+            listing[tty] = [(
+                os.path.basename(fname),
+                stat.st_size,
+                time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime))
+                ) for fname, stat in zip(paths, stats)
+            ]
             listing[tty].sort()
 
         return render_template(
             'index.html',
             ttys=TTYS,
-            listing=listing
+            listing=listing,
+            strftime=time.strftime
         )
 
-    if not os.path.exists(path):
-        return "DOES NOT EXIST"
+    abs_path = os.sep.join([logs_root, os.path.basename(path)])
+    if not os.path.exists(abs_path):
+        return "path(%s) DOES NOT EXIST" % path
 
     return send_from_directory(logs_root, os.path.basename(path))
 

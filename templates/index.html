@@ -8,14 +8,27 @@
 {% block body %}
 
 {% for tty in ttys %}
-<h2><a href="/w{{ tty }}">{{ tty }}</a></h2>
+<fieldset>
+  <legend><a href="/w{{ tty }}" title="Connect to {{ tty}}">{{ tty }}</a></legend>
+  
+  <table>
+  <thead>
+    <tr><td>Filename</td><td>Size</td><td>Last Modified</td></tr>
+  </thead>
+  <tfoot />
+  <tbody>
+  {% for fname, nbytes, lmod in listing[tty] %}
+  <tr><td><a href="{{ fname }}" title="Download {{fname}}">{{ fname }}</a></td><td>{{ nbytes | filesizeformat }}</td><td>{{ lmod }}</td></tr>
+  {% else %}
+  <tr><td colspan="3">None available</td></tr>
+  {% endfor %}
+  </tbody>
+  </table>
 
-{% for fname in listing[tty] %}
-{{ fname }}<br />
-{% endfor %}
+</fieldset>
 
 {% else %}
-  <li><em>No ttys configured.</em>
+  <em>No ttys configured.</em>
 {% endfor %}
 
 {% endblock %}
