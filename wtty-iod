@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: ascii -*-
+"""
+    wtty-iod - Daemonize the IO logic
+"""
+import wtty
+import wtty.iod
+
+if __name__ == "__main__":
+    wtty.daemonify("wtty-iod", wtty.iod.main)

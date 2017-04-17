@@ -1,0 +1,10 @@
+#!/usr/bin/env python
+# -*- coding: ascii -*-
+"""
+    wtty-appd - Daemonize the web-app
+"""
+import wtty
+import wtty.app
+
+if __name__ == "__main__":
+    wtty.daemonify("wtty-app", wtty.app.main)

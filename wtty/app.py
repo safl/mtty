@@ -3,6 +3,7 @@ import inspect
 from flask import Flask, render_template, session, request
 from flask import send_from_directory
 import flask_socketio as fsio
+import logging
 import select
 import glob
 import time
@@ -20,8 +21,6 @@ APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'secret!'
 SIO = fsio.SocketIO(APP, async_mode=ASYNC_MODE)
 
-TTYS = ["ttyUSB0", "ttyUSB1", "ttyUSB2", "ttyUSB3"]
-#TTYS = []
 WORKERS = []
 
 def tailf(fpath):
@@ -47,14 +46,18 @@ def tailf(fpath):
         except IOError:
             time.sleep(POLL_EXISTS)
 
-def background_thread(tty):
+def background_thread(dev):
     """Example of how to send server generated events to clients."""
 
-    for chunk in tailf("/tmp/%s.log" % tty):
-        payload = {
-            'data': chunk
-        }
-        SIO.emit('wtty_out', payload, room=tty, broadcast=True)
+    tty_name = os.path.basename(dev)
+    tty_out = os.sep.join([
+        APP.config["wtty"]["roots"]["reader"], "%s.log" % tty_name
+    ])
+
+    for chunk in tailf(tty_out):
+        payload = {'data': chunk}
+
+        SIO.emit('wtty_out', payload, room=tty_name, broadcast=True)
 
 @APP.route('/wtty<string:dev>')
 def index(dev):
@@ -73,49 +76,59 @@ def index(dev):
 def logs(path):
     """Serve the log files in their raw form"""
 
-    logs_root = os.sep.join(["", "tmp"])
-
     if path is None:
         listing = {}
-        
-        for tty in TTYS:
-            pattern = os.sep.join([logs_root, "%s*.log" % tty])
+
+        tty_names = [
+            os.path.basename(dev) for dev in APP.config["wtty"]["devices"]
+        ]
+
+        for tty_name in tty_names:
+            pattern = os.sep.join([
+                APP.config["wtty"]["roots"]["reader"], "%s.*" % tty_name
+            ])
             paths = glob.glob(pattern)
             stats = [os.stat(path) for path in paths]
-            listing[tty] = [(
+            listing[tty_name] = [(
                 os.path.basename(fname),
                 stat.st_size,
                 time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(stat.st_mtime))
                 ) for fname, stat in zip(paths, stats)
             ]
-            listing[tty].sort()
+            listing[tty_name].sort()
 
         return render_template(
             'index.html',
-            ttys=TTYS,
+            ttys=tty_names,
             listing=listing,
             strftime=time.strftime
         )
 
-    abs_path = os.sep.join([logs_root, os.path.basename(path)])
+    fname = os.path.basename(path)
+    abs_path = os.sep.join([APP.config["wtty"]["roots"]["reader"], fname])
     if not os.path.exists(abs_path):
         return "path(%s) DOES NOT EXIST" % path
 
-    return send_from_directory(logs_root, os.path.basename(path))
+    return send_from_directory(APP.config["wtty"]["roots"]["reader"], fname)
 
 @SIO.on('wtty_dev')
 def wtty_dev(message):
 
     tty = message["data"]
 
-    print("Got: %s" % str(message))
+    logging.info("Got: %s", str(message))
     fsio.join_room(tty)
 
 @SIO.on('wtty_in')
 def wtty_in(message):
-    print(inspect.currentframe().f_code.co_name)
 
-    print("Got: %s" % str(message))
+    tty_name = message["tty_name"]  # Write to tty_in
+    tty_outp = os.sep.join([
+        APP.config["wtty"]["roots"]["writer"], "%s.in" % tty_name
+    ])
+
+    with open(tty_outp, "a") as tty_outf:
+        tty_outf.write("%s\n" % message["data"])
 
     session['receive_count'] = session.get('receive_count', 0) + 1
 
@@ -127,7 +140,6 @@ def wtty_in(message):
 
 @SIO.on('connect')
 def wtty_connect():
-    print(inspect.currentframe().f_code.co_name)
 
     payload = {
         'data': 'Connected',
@@ -135,28 +147,28 @@ def wtty_connect():
     }
     fsio.emit('wtty_info', payload)
 
-    print("Client connected")
+    logging.info("Client connected")
 
 @SIO.on('disconnect')
 def wtty_disconnect():
-    print(inspect.currentframe().f_code.co_name)
 
-    print('Client disconnected', request.sid)
+    logging.info('Client disconnected request.sid(%s)', str(request.sid))
 
 @SIO.on('ping')
 def ping_pong():
-    print(inspect.currentframe().f_code.co_name)
 
     fsio.emit('pong')
 
-def main():
+def main(cfg, state):
 
-    for tty in TTYS:
+    APP.config["wtty"] = cfg
+
+    for dev in APP.config["wtty"]["devices"]:
         WORKERS.append(
-            SIO.start_background_task(target=background_thread, tty=tty)
+            SIO.start_background_task(target=background_thread, dev=dev)
         )
 
     SIO.run(APP, debug=True)
 
 if __name__ == '__main__':
-    main()
+    main(None, None)

@@ -13,7 +13,7 @@
 
     <section class="content">
         <div class="content-body">
-        <div id="log" class="scroller"></div>
+        <pre id="log" class="scroller"></pre>
         </div>
     </section>
 
@@ -30,6 +30,7 @@
         var socket = io.connect(location.protocol + '//' + document.domain + ':' + location.port);
         var ping_pong_times = [];
         var start_time;
+        var tty_name = '{{ tty }}';
 
         // Event handler for new connections.
         // The callback function is invoked when a connection with the
@@ -37,7 +38,7 @@
         socket.on('connect', function() {
             console.log("socket.on:connect");
 
-            socket.emit('wtty_dev', {data: "{{ tty }}" });
+            socket.emit('wtty_dev', {data: tty_name});
 
             // Focus input section
             $('#emit_data').focus();
@@ -58,7 +59,7 @@
 
             var payload = msg.data;
 
-            $('#log').append(payload + "<br/>");
+            $('#log').append(payload);
 
             if ((!document.hasFocus()) || $('#emit_data').is(":focus")) {
                 $('#log').scrollTop($('#log').prop('scrollHeight'));
@@ -87,7 +88,8 @@
         // These accept data from the user and send it to the server in a
         // variety of ways
         $('form#emit').submit(function(event) {
-            socket.emit('wtty_in', {data: $('#emit_data').val()});
+            socket.emit('wtty_in', {
+                tty_name: tty_name, data: $('#emit_data').val()});
             event.currentTarget.reset();
             return false;
         });
