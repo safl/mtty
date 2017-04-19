@@ -19,6 +19,8 @@ ASYNC_MODE = "gevent"
 
 APP = Flask(__name__)
 APP.config['SECRET_KEY'] = 'secret!'
+APP.config["SERVER_HOST"] = "0.0.0.0"
+APP.config["SERVER_PORT"] = 80
 SIO = fsio.SocketIO(APP, async_mode=ASYNC_MODE)
 
 WORKERS = []
@@ -168,7 +170,12 @@ def main(cfg, state):
             SIO.start_background_task(target=background_thread, dev=dev)
         )
 
-    SIO.run(APP, debug=True)
+    SIO.run(
+        APP,
+        debug=True,
+        host=APP.config.get("SERVER_HOST"),
+        port=APP.config.get("SERVER_PORT")
+    )
 
 if __name__ == '__main__':
     main(None, None)

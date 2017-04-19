@@ -51,8 +51,8 @@ class TTYReader(TTYWorker):
 
     def run(self):
 
-        tty_out = os.sep.join([self.root, "%s.log" % self.tty])
-        logging.info("tty_out(%s)" % tty_out)
+        tty_out_path = os.sep.join([self.root, "%s.log" % self.tty])
+        logging.info("tty_out_path(%s)" % tty_out_path)
 
         while self.keep_running:
 
@@ -75,22 +75,26 @@ class TTYReader(TTYWorker):
                 continue
 
             try:
-                with open(self.dev, "rb", 0) as tty, \
-                     open(tty_out, "ab", 0) as log:
 
-                    while self.keep_running:
+                with open(self.dev, "rb", 0) as dev_r, \
+                     open(tty_out_path, "ab", 0) as tty_out:
+
+                    while self.keep_running and \
+                        os.fstat(dev_r.fileno()).st_nlink and \
+                        os.fstat(tty_out.fileno()).st_nlink:
+
                         ready, _, _ = select.select(
-                            [tty.fileno()], [], [], SELECT_TO
+                            [tty_out.fileno()], [], [], SELECT_TO
                         )
 
                         if not ready:
                             continue
 
-                        payload = tty.read(1)
+                        payload = dev_r.read(1)
                         if payload is None:
                             break
 
-                        log.write(payload)
+                        tty_out.write(payload)
             except:
                 logging.error("error(%s)" % str(sys.exc_info()))
 
@@ -134,7 +138,9 @@ class TTYWriter(TTYWorker):
 
                     tty_in.seek(0, 2)
 
-                    while self.keep_running:
+                    while self.keep_running and \
+                        os.fstat(dev_w.fileno()).st_nlink and \
+                        os.fstat(tty_in.fileno()).st_nlink:
 
                         line = tty_in.readline()
 
