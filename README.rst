@@ -26,6 +26,7 @@ Install packages::
   apt-get install raspi-config
 
 Run raspi-config, change hostname, timezone, resize filesystem, then reboot.
+After reboot continue installating::
   
   apt-get install git vim-nox logrotate make
   apt-get install python python-yaml python-flask python-socketio python-pip
