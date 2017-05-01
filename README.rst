@@ -25,7 +25,8 @@ Install packages::
   apt-get dist-upgrade -y
   apt-get autoclean
   apt-get clean
-  apt-get install raspi-config git vim-nox logrotate make
+  apt-get install raspi-config
+  apt-get install git vim-nox logrotate make
   apt-get install python python-yaml python-flask python-socketio python-pip
   apt-get autoclean
   apt-get clean
