@@ -28,10 +28,10 @@ Update and upgrade packages and run raspi-config::
 
 In raspi-config change:
 
- * 2 Hostname
- * 4 Localization > I2 Change Timezone
- * 7 Advanced Options > A1 Expand Filesystem
- * <Finish> and reboot
+  * 2 Hostname
+  * 4 Localization > I2 Change Timezone
+  * 7 Advanced Options > A1 Expand Filesystem
+  * <Finish> and reboot
 
 After reboot continue installing and cleanup::
   
