@@ -18,18 +18,26 @@ Change password::
 
   passwd
 
-Install packages::
+Update and upgrade packages and run raspi-config::
 
   apt-get update
   apt-get upgrade -y
   apt-get dist-upgrade -y
   apt-get install raspi-config
+  raspi-config
 
-Run raspi-config, change hostname, timezone, resize filesystem, then reboot.
-After reboot continue installating::
+In raspi-config change:
+
+ * 2 Hostname
+ * 4 Localization > I2 Change Timezone
+ * 7 Advanced Options > A1 Expand Filesystem
+ * <Finish> and reboot
+
+After reboot continue installing and cleanup::
   
-  apt-get install git vim-nox logrotate make
-  apt-get install python python-yaml python-flask python-socketio python-pip
+  apt-get install \
+    make git vim-nox logrotate \
+    python python-yaml python-flask python-socketio python-pip
   apt-get autoclean
   apt-get clean
 
