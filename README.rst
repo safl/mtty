@@ -41,14 +41,6 @@ After reboot continue installing and cleanup::
   apt-get autoclean
   apt-get clean
 
-Install wtty::
-
-  mkdir -p $HOME/git
-  cd $HOME/git
-  git clone https://github.com/safl/wtty.git
-  cd wtty
-  make install
-
 Then create wtty filesystem::
 
   mkdir /srv/wtty
@@ -56,6 +48,18 @@ Then create wtty filesystem::
 Edit `vim /etc/fstab`, adding the following to make it available on boot::
 
   /dev/sda1 /srv/wtty ext4 errors=remount-ro,noatime,nodiratime,commit=120 0 1
+  
+Mount it:
+
+  mount /srv/wtty
+
+Install wtty::
+
+  mkdir -p $HOME/git
+  cd $HOME/git
+  git clone https://github.com/safl/wtty.git
+  cd wtty
+  make install
 
 Reboot to check that everything starts up correctly on boot.
 
