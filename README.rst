@@ -49,7 +49,7 @@ Edit `vim /etc/fstab`, adding the following to make it available on boot::
 
   /dev/sda1 /srv/wtty ext4 errors=remount-ro,noatime,nodiratime,commit=120 0 1
   
-Mount it:
+Mount it::
 
   mount /srv/wtty
 
