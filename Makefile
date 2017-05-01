@@ -20,5 +20,13 @@ stop:
 	service wtty-appd stop
 	service wtty-iod stop
 
+start_ubuntu:
+	sudo ./etc/init.d/wtty-iod start
+	sudo ./etc/init.d/wtty-appd start
+
+stop_ubuntu:
+	sudo ./etc/init.d/wtty-appd stop
+	sudo ./etc/init.d/wtty-iod stop
+
 clean:
 	rm -r build
