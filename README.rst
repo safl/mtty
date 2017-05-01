@@ -23,15 +23,14 @@ Install packages::
   apt-get update
   apt-get upgrade -y
   apt-get dist-upgrade -y
-  apt-get autoclean
-  apt-get clean
   apt-get install raspi-config
+
+Run raspi-config, change hostname, timezone, resize filesystem, then reboot.
+  
   apt-get install git vim-nox logrotate make
   apt-get install python python-yaml python-flask python-socketio python-pip
   apt-get autoclean
   apt-get clean
-
-Run raspi-config, change hostname, timezone and resize filesystem.
 
 Install wtty::
 
