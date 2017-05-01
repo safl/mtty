@@ -11,7 +11,7 @@ from daemon import DaemonContext
 from daemon.pidfile import PIDLockFile
 
 logging.basicConfig(
-    format="%(asctime)s-%(filename)s-%(levelname)s: %(message)s",
+    format="%(asctime)s-%(filename)s-%(funcName)s: %(message)s",
     level=logging.ERROR
 )
 

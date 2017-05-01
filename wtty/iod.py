@@ -84,17 +84,21 @@ class TTYReader(TTYWorker):
                         os.fstat(tty_out.fileno()).st_nlink:
 
                         ready, _, _ = select.select(
-                            [tty_out.fileno()], [], [], SELECT_TO
+                            [dev_r.fileno()], [], [], SELECT_TO
                         )
 
                         if not ready:
                             continue
 
+                        logging.debug("dev_r.read(1)")
                         payload = dev_r.read(1)
+                        logging.debug("dev_r.read(1) -- DONE")
                         if payload is None:
                             break
 
+                        logging.debug("tty_out.write")
                         tty_out.write(payload)
+                        logging.debug("tty_out.write -- DONE")
             except:
                 logging.error("error(%s)" % str(sys.exc_info()))
 
@@ -142,22 +146,33 @@ class TTYWriter(TTYWorker):
                         os.fstat(dev_w.fileno()).st_nlink and \
                         os.fstat(tty_in.fileno()).st_nlink:
 
+                        ready, _, _ = select.select(
+                            [tty_in.fileno()], [], [], SELECT_TO
+                        )
+
+                        if not ready:
+                            continue
+
                         line = tty_in.readline()
 
                         if not line:
-                            time.sleep(0.1)
                             continue
 
+                        logging.debug("dev_w.write")
                         dev_w.write(line.strip())
+                        logging.debug("dev_w.write -- DONE")
                         time.sleep(0.1)
+                        logging.debug("dev_w.write CR")
                         dev_w.write('\r')
+                        logging.debug("dev_w.write CR -- DONE")
             except:
                 logging.error("error(%s)" % str(sys.exc_info()))
 
 def main(cfg, state):
     """Entry point for wtty-iod"""
 
-    logging.info("Creating workers")
+    logging.critical("Starting...")
+
     for tty in cfg["devices"]:
         READERS.append(TTYReader(tty, cfg["roots"]["reader"]))
         WRITERS.append(TTYWriter(tty, cfg["roots"]["writer"]))
@@ -166,12 +181,18 @@ def main(cfg, state):
     for worker in READERS + WRITERS:
         worker.start()
 
+    logging.critical("Working...")
     while (state["keep_running"]):
         time.sleep(0.1)
 
-    logging.info("Stopping and joining workers")
-    for worker in WRITERS + READERS:
+    logging.info("Stopping")
+    for i, worker in enumerate(WRITERS + READERS):
+        logging.debug("Stopping i(%d)" % i)
         worker.stop()
+
+    logging.info("Joining")
+    for i, worker in enumerate(WRITERS + READERS):
+        logging.debug("Joining i(%d)" % i)
         worker.join()
 
-    logging.info("DONE")
+    logging.critical("Stopped.")

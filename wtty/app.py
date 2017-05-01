@@ -163,6 +163,8 @@ def ping_pong():
 
 def main(cfg, state):
 
+    logging.critical("Starting...")
+
     APP.config["wtty"] = cfg
 
     for dev in APP.config["wtty"]["devices"]:
@@ -176,6 +178,8 @@ def main(cfg, state):
         host=APP.config.get("SERVER_HOST"),
         port=APP.config.get("SERVER_PORT")
     )
+
+    logging.critical("Stopped.")
 
 if __name__ == '__main__':
     main(None, None)
