@@ -70,10 +70,22 @@ def daemonify(descr, action):
     conf["pid"] = expand_path(args.pid)
     conf["log"] = expand_path(args.log)
 
+    if os.path.exists(conf["pid"]):                     # FIX STALE PID
+        try:
+            pid = int(open(conf["pid"]).read())
+            os.kill(pid, 0)
+            logging.critical("??? Already running pid:%d path: %s" % (
+                pid, conf["pid"])
+            )
+            #exit(1)
+        except OSError:
+            os.remove(conf["pid"])
+
     state = {"keep_running": True}                      # STATE
 
     def daemon_terminate(signum, frame):
-        state["keep_running"] = False
+        if signum in [signal.SIGHUP, signal.SIGTERM]:
+            state["keep_running"] = False
                                                         # SPAWN!
     with open(conf["log"], "a+") as log, \
         DaemonContext(

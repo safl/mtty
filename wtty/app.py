@@ -180,6 +180,3 @@ def main(cfg, state):
     )
 
     logging.critical("Stopped.")
-
-if __name__ == '__main__':
-    main(None, None)
