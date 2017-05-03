@@ -7,8 +7,8 @@
 # Required-Stop:     $remote_fs $syslog
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: wtty IO daemon 
-# Description:       tty <--> file
+# Short-Description: wtty app daemon
+# Description:       web <--> file
 ### END INIT INFO
 
 NAME="wtty-appd"
