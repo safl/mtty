@@ -29,6 +29,11 @@ Update and upgrade packages and run raspi-config::
   apt-get install raspi-config
   raspi-config
 
+Modify `vim /boot/config`, add the following to disable BT and WiFi::
+
+  dtoverlay=pi3-disable-bt
+  dtoverlay=pi3-disable-wifi
+
 In raspi-config change:
 
   * 2 Hostname
