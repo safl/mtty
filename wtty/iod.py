@@ -12,7 +12,7 @@ import os
 TTY_OPTS="-icrnl -onlcr -imaxbel -opost -isig -icanon -echo line 0 kill ^H min 100 time 2 brkint 115200"
 READERS = []
 WRITERS = []
-SELECT_TO = 1
+SELECT_TO = 0.1
 
 def tty_set_opts(dev, opts):
     """Set tty options"""
