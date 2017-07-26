@@ -57,7 +57,7 @@ def background_thread(dev):
     ])
 
     for chunk in tailf(tty_out):
-        payload = {'data': chunk}
+        payload = {'data': unicode(chunk, errors="replace")}
 
         SIO.emit('wtty_out', payload, room=tty_name, broadcast=True)
 
